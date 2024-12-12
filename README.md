@@ -1,7 +1,7 @@
 # PagPassGPT
 PagPassGPT: Pattern Guided Password Guessing via Generative Pretrained Transformer
 
-Paper: https://arxiv.org/abs/2404.04886v1
+Paper: [https://arxiv.org/abs/2404.04886v1](https://www.computer.org/csdl/proceedings-article/dsn/2024/410500a429/1ZPxTMt2ao8)
 
 ## 1 Environment
 
