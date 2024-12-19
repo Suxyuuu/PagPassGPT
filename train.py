@@ -21,8 +21,8 @@ parser.add_argument("--num_processer", help="num of processer (cpu logit cores)"
 # model parameter setting
 parser.add_argument("--input_size", help="should be larger than (2*max len of password + 3), default is 32 according to max_len=12", type=int, default=32)
 parser.add_argument("--embed_size", help="embedding size", type=int, default=384)
-parser.add_argument("--layer_num", help="num of layers", type=int, default=8)
-parser.add_argument("--head_num", help="num of multi head", type=int, default=12)
+parser.add_argument("--layer_num", help="num of layers", type=int, default=12)
+parser.add_argument("--head_num", help="num of multi head", type=int, default=8)
 # training parameter setting
 parser.add_argument("--epoch_num", help="num of epoch (containing early stop))", type=int, default=30)
 parser.add_argument("--batch_size", help="batch_size", type=int, default=512)

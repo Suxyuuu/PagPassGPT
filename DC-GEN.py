@@ -9,6 +9,7 @@ import time
 import threading
 import pandas as pd
 import argparse
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model_path", help="directory of pagpassgpt", type=str, required=True)
@@ -18,6 +19,8 @@ parser.add_argument("--output_path", help="directory of output file path", type=
 parser.add_argument("--generate_num", help="total guessing number", default=1000000, type=int)
 parser.add_argument("--save_num", help="per n passwords generated save once", default=20000000, type=int)
 parser.add_argument("--batch_size", help="generate batch size", default=5000, type=int)
+parser.add_argument("--gpu_num", help="gpu num", default=1, type=int)
+parser.add_argument("--gpu_index", help="Starting GPU index", default=0, type=int)
 args = parser.parse_args()
 
 BRUTE_DICT = {'L':52, 'N':10, 'S':32}   # L has 52 different letters, N has 10 different numbers and S has 32.
@@ -27,15 +30,23 @@ TYPE_ID_DICT = {'L':(51, 103),
                 'N':(41, 51),
                 'S':(103, 135),
                 }
-d
+
 model_path = args.model_path
 vocab_file = args.vocabfile_path
 pattern_file = args.pattern_path
-output_path = args.vocabfile_path
+output_path = args.output_path
 
 n = args.generate_num
 save_num = args.save_num
 batch_size = args.batch_size
+gpu_num = args.gpu_num
+gpu_index = args.gpu_index
+
+# create new folder to store generation passwords
+output_path = output_path + str(n) + '/'
+folder = os.path.exists(output_path)
+if not folder:
+    os.makedirs(output_path)
 
 class KeywordsStoppingCriteria(StoppingCriteria):
     def __init__(self, keywords_ids:list):
@@ -185,7 +196,7 @@ def single_gpu_task(task_list, gpu_id, tokenizer):
         
         while len(gened_passwords) > save_num:
             output_passwords = gened_passwords[:save_num]
-            file_path = output_path + '[cuda:'+ str(gpu_id) + ']-'+str(output_count)+'.txt'
+            file_path = output_path +'DC-GEN-[cuda:'+ str(gpu_id) + ']-'+str(output_count)+'.txt'
             f = open(file_path, 'w', encoding='utf-8', errors='ignore')
             for password in output_passwords:
                 f.write(password+'\n')
@@ -195,7 +206,7 @@ def single_gpu_task(task_list, gpu_id, tokenizer):
             print(f'===> File saved in {file_path}.')
 
     if len(gened_passwords) != 0:
-        file_path = output_path + '[cuda:'+ str(gpu_id) + ']-last.txt'
+        file_path = output_path + 'DC-GEN-[cuda:'+ str(gpu_id) + ']-last.txt'
         f = open(file_path, 'w', encoding='utf-8', errors='ignore')
         for password in gened_passwords:
             f.write(password+'\n')
@@ -237,7 +248,6 @@ if __name__ == "__main__":
                                     )
     tokenizer.padding_side = "left"
 
-    gpu_num = torch.cuda.device_count()
     print(f'Load patterns.')
     df = pd.read_csv(pattern_file, sep='\t', header=None, names=['pattern', 'rate'])
     total_task_list = prepare_task_list(df, gpu_num)
@@ -247,7 +257,7 @@ if __name__ == "__main__":
     print('*'*30)
     print(f'Generation begin.')
     for i in range(gpu_num):
-        thread = threading.Thread(target=single_gpu_task, args=[total_task_list[i], i, tokenizer])
+        thread = threading.Thread(target=single_gpu_task, args=[total_task_list[i], i+gpu_index, tokenizer])
         thread.start()
         threads.append(thread)
     

@@ -6,6 +6,7 @@ import threading
 import torch
 from tokenizer import CharTokenizer
 import argparse
+import os
 
 
 MAX_LEN = 32    # It should be equal to input size of model.
@@ -51,7 +52,7 @@ def gen_sample(test_model_path, tokenizer, GEN_BATCH_SIZE, GPU_ID):
     return [*passwords,]
 
 
-def gen_parallel(vocab_file, batch_size, test_model_path, N, gen_passwords_path):
+def gen_parallel(vocab_file, batch_size, test_model_path, N, gen_passwords_path, num_gpus, gpu_index):
     print(f'Load tokenizer.')
     tokenizer = CharTokenizer(vocab_file=vocab_file, 
                               bos_token="<BOS>",
@@ -66,7 +67,6 @@ def gen_parallel(vocab_file, batch_size, test_model_path, N, gen_passwords_path)
     if not torch.cuda.is_available():
         print('ERROR! GPU not found!')
     else:
-        num_gpus = torch.cuda.device_count()
         total_start = time.time()
         threads = {}
         total_passwords = []
@@ -77,12 +77,11 @@ def gen_parallel(vocab_file, batch_size, test_model_path, N, gen_passwords_path)
         print('Total generation needs {} batchs.'.format(total_round))
 
         i = 0
-        gpu_id = 0
         while(i < total_round or len(threads) > 0 ):
             if len(threads) == 0:
                 for gpu_id in range(num_gpus):
                     if i < total_round:
-                        t=ThreadBase(target=gen_sample, args=(test_model_path, tokenizer, batch_size, gpu_id))
+                        t=ThreadBase(target=gen_sample, args=(test_model_path, tokenizer, batch_size, gpu_id+gpu_index))
                         t.start()
                         threads[t] = i
                         i += 1
@@ -100,7 +99,7 @@ def gen_parallel(vocab_file, batch_size, test_model_path, N, gen_passwords_path)
                
         total_passwords = set(total_passwords)
 
-        gen_passwords_path = gen_passwords_path + f'{n}-normal' + '.txt'
+        gen_passwords_path = gen_passwords_path + 'Normal-GEN' + '.txt'
         
         f_gen = open(gen_passwords_path, 'w', encoding='utf-8', errors='ignore')
         for password in total_passwords:
@@ -123,6 +122,8 @@ if __name__ == '__main__':
     parser.add_argument("--output_path", help="path of output file path", type=str, required=True)
     parser.add_argument("--generate_num", help="total guessing number", default=1000000, type=int)
     parser.add_argument("--batch_size", help="generate batch size", default=5000, type=int)
+    parser.add_argument("--gpu_num", help="gpu num", default=1, type=int)
+    parser.add_argument("--gpu_index", help="Starting GPU index", default=0, type=int)
     args = parser.parse_args()
 
     model_path = args.model_path
@@ -131,5 +132,12 @@ if __name__ == '__main__':
 
     n = args.generate_num
     batch_size = args.batch_size
+    num_gpus = args.gpu_num
+    gpu_index = args.gpu_index
+
+    output_path = output_path + str(n) + '/'
+    folder = os.path.exists(output_path)
+    if not folder:
+        os.makedirs(output_path)
     
-    gen_parallel(vocab_file, batch_size, model_path, n, output_path)
+    gen_parallel(vocab_file, batch_size, model_path, n, output_path, num_gpus, gpu_index)
