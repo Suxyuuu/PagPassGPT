@@ -5,12 +5,13 @@ Codes for Paper: [PagPassGPT: Pattern Guided Password Guessing via Generative Pr
 
 ## 1 Environment
 
-
 ```shell
-conda create -n password python=3.8.10
-conda activate password
-pip install numpy==1.24.2 huggingface-hub==0.13.4 fsspec==2022.11.0 torch==2.0.0 transformers==4.29.0 datasets==2.12.0 accelerate==0.17.1
+conda create -n env_name python=3.8.10
+conda activate env_name
+pip install -r requirements.txt
+# pip install numpy==1.24.2 huggingface-hub==0.13.4 fsspec==2022.11.0 torch==2.0.0 transformers==4.29.0 datasets==2.12.0 accelerate==0.17.1
 ```
+
 
 ## 2 Usage
 
@@ -51,6 +52,7 @@ sh ./scripts/evaluate.sh
 
 ## 3 Update Logs
 
++ 2024.12.20: Add pip requirements.
 + 2024.12.19: Update all codes.
   + Fix some errors.
   + Provide more precise environmental requirements.
