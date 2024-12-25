@@ -62,7 +62,7 @@ class CharTokenizer(PreTrainedTokenizer):
         #     if not is_hit:
         #         result.append(self.unk_token)
         #         text = text[1:]
-        return text.split(' ')
+        return text.strip(' ').split(' ')
 
     def _convert_token_to_id(self, token):
         """Converts a token (str) in an id using the vocab."""
@@ -78,7 +78,7 @@ class CharTokenizer(PreTrainedTokenizer):
         return text
     
     def encode(self, text: str, return_is_tensor=False) -> Any:
-        indices: List[int] = [self.encoder.get(c, self.unk_token) for c in self._tokenize(text)]
+        indices: List[int] = [self.encoder.get(c, self.unk_token_id) for c in self._tokenize(text)]
         if self.add_bos_and_eos:
             indices = [self.bos_token_id] + indices + [self.eos_token_id]
         if return_is_tensor:
