@@ -52,9 +52,10 @@ sh ./scripts/evaluate.sh
 
 ## 3 Update Logs
 
++ 2024.12.25: Fix some bugs.
 + 2024.12.20: Add pip requirements.
 + 2024.12.19: Update all codes.
-  + Fix some errors.
+  + Fix some bugs.
   + Provide more precise environmental requirements.
   + Provide new files for evaluation.
   + Make codes more user-friendly. 
