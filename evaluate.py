@@ -9,15 +9,10 @@ parser.add_argument("--gen_path", help="path of generated password", type=str, r
 parser.add_argument("--isNormal", action="store_true", help="whether the generated password is in normal method")
 args = parser.parse_args()
 
-print("isNormal: ", args.isNormal)
-print(type(args.isNormal))
-
 if args.isNormal:
     keyWord = "Normal"
 else:
     keyWord = "DC"
-
-print("KeyWord: ", keyWord)
 
 def get_all_files(path):
     files = []
@@ -28,9 +23,6 @@ def get_all_files(path):
     return files
 
 gen_files = get_all_files(args.gen_path)
-print("Files: ")
-for file in gen_files:
-    print(file)
 
 
 def get_gen_passwords(gen_files, isNormal):
